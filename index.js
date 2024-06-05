@@ -8,15 +8,32 @@ const todoRouter = require("./routers/todo");
 const { checkForAuthenticationCookies } = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
 const PORT = 3000;
-
+require("dotenv").config();
 mongoose
-  .connect("mongodb://127.0.0.1:27017/Todo")
-  .then(() => {
-    console.log("Connected to MongoDB");
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    retryWrites: true, // Set retryWrites as a boolean
   })
-  .catch((error) => {
-    console.log(error);
+  .then(() => {
+    console.log("mongoose connected!--");
+  })
+  .catch((err) => {
+    console.log(err, "Some ERROR TO CONNECT MONGOOSE");
   });
+const db = mongoose.connection;
+
+db.on("connected", () => {
+  console.log("Connected to MongoDB server");
+});
+
+db.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
+});
+
+db.on("disconnected", () => {
+  console.log("MongoDB disconnected");
+});
 
 //middleware
 app.use(express.json());
